@@ -1,0 +1,56 @@
+# KiCad
+pcb/*.pro
+pcb/*.bak
+pcb/*.sch-bak
+pcb/*.pcb-bak
+pcb/*-cache.lib
+pcb/*-rescue.lib
+pcb/*.xml
+pcb/autoplace-by-gui/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.env
+.venv
+env/
+venv/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Build outputs
+cad/*.stl
+cad/*.step
+cad/*.dxf
+!cad/exports/

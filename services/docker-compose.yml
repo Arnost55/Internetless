@@ -1,0 +1,104 @@
+version: '3.8'
+
+services:
+  # Travel Router Core Services
+  network-manager:
+    image: ghcr.io/internetless/network-manager:latest
+    container_name: internetless-network
+    privileged: true
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - /etc/NetworkManager:/etc/NetworkManager
+      - /var/lib/NetworkManager:/var/lib/NetworkManager
+      - ./config/network:/config
+    environment:
+      - TZ=UTC
+    # Capabilities needed for routing
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_MODULE
+
+  # Status Web Interface
+  status-web:
+    image: ghcr.io/internetless/status-web:latest
+    container_name: internetless-status
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./config/status:/config
+      - /sys/class/thermal:/sys/class/thermal:ro
+      - /proc:/host/proc:ro
+    environment:
+      - PORT=8080
+      - UPDATE_INTERVAL=1000
+
+  # eSIM Manager (lpac)
+  esim-manager:
+    image: ghcr.io/internetless/esim-manager:latest
+    container_name: internetless-esim
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - ./config/esim:/config
+      - /var/lib/ModemManager:/var/lib/ModemManager
+    environment:
+      - LPAC_MODE=daemon
+      - MODEM_DEVICE=/dev/ttyUSB2
+    cap_add:
+      - NET_ADMIN
+
+  # Pi-hole DNS/Ad-blocking
+  pihole:
+    image: pihole/pihole:latest
+    container_name: internetless-pihole
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "8081:80"
+    volumes:
+      - ./config/pihole:/etc/pihole
+      - ./config/dnsmasq:/etc/dnsmasq.d
+    environment:
+      - TZ=UTC
+      - WEBPASSWORD=${PIHOLE_PASSWORD:-changeme}
+      - DNS1=1.1.1.1
+      - DNS2=9.9.9.9
+    cap_add:
+      - NET_ADMIN
+
+  # Local AI API (Ollama for edge inference)
+  local-ai:
+    image: ollama/ollama:latest
+    container_name: internetless-ai
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./models:/root/.ollama/models
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    # For Coral TPU, add: --device=/dev/apex_0
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+volumes:
+  pihole_config:
+  dnsmasq_config:
+  esim_config:
+  models:
+  network_config:
+
+networks:
+  default:
+    name: internetless
+    driver: bridge
