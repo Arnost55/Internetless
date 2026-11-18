@@ -8,12 +8,12 @@ Renders live system stats on 0.96" SSD1306 OLED:
   • UPS battery percentage
   • Active PCIe module count
 
-Requires: luma.oled, psutil, RPi.GPIO
+Requires: luma.oled, psutil
 
 Usage:
     sudo python3 display_daemon.py
 
-Run as root for GPIO access.
+Run as root for I2C access on the board's SMBus header.
 """
 
 import time
@@ -36,12 +36,13 @@ except ImportError:
     exit(1)
 
 # Configuration
-I2C_PORT = 1
+# I2C bus number varies by board: check with `i2cdetect -l`
+I2C_PORT = 0
 I2C_ADDRESS = 0x3C
 REFRESH_INTERVAL = 1.0  # seconds
 
-# Battery monitoring (adjust for your hardware)
-BATTERY_ADC_PIN = None  # Set to GPIO pin if using ADC
+# Battery monitoring (adjust for your UPS baseplate)
+# Preferred: SMBus fuel gauge on the battery pack; fallback: ADC + divider
 BATTERY_MAX_VOLTAGE = 4.2
 BATTERY_MIN_VOLTAGE = 3.0
 
@@ -53,25 +54,29 @@ class SystemMonitor:
     def get_cpu_temp() -> float:
         """Return CPU temperature in Celsius."""
         try:
-            # Try thermal zone first (most reliable on Pi 5)
-            thermal_path = Path("/sys/class/thermal/thermal_zone0/temp")
-            if thermal_path.exists():
-                temp_raw = thermal_path.read_text().strip()
-                return float(temp_raw) / 1000.0
-        except (OSError, ValueError):
+            # Coretemp sysfs (Intel N100 via lm-sensors) or thermal zone
+            for pattern in ("/sys/class/hwmon/hwmon*/temp1_input",
+                            "/sys/class/thermal/thermal_zone0/temp"):
+                for path in Path("/sys/class").glob(pattern.replace("/sys/class/", "")):
+                    try:
+                        return float(path.read_text().strip()) / 1000.0
+                    except (OSError, ValueError):
+                        continue
+        except OSError:
             pass
 
-        # Fallback: use vcgencmd
+        # Fallback: lm-sensors
         try:
             result = subprocess.run(
-                ["vcgencmd", "measure_temp"],
+                ["sensors"],
                 capture_output=True,
                 text=True,
                 timeout=2
             )
-            # Output: temp=42.8'C
-            temp_str = result.stdout.strip().split("=")[1].rstrip("'C\n")
-            return float(temp_str)
+            for line in result.stdout.splitlines():
+                if "Package id 0" in line and "+" in line:
+                    temp_str = line.split("+")[1].split("°")[0]
+                    return float(temp_str)
         except (subprocess.SubprocessError, ValueError, IndexError):
             pass
 
@@ -87,14 +92,12 @@ class SystemMonitor:
         """
         Return battery percentage (0-100).
 
-        TODO: Implement based on your UPS hardware.
+        TODO: Implement based on your UPS baseplate hardware.
         Options:
-          - Read from ADC via GPIO
-          - Read from I2C fuel gauge IC
-          - Read from UPS HAT (e.g., Waveshare, Geekworm)
+          - Read from SMBus fuel gauge IC (e.g., BQ20Zxx)
+          - Read from ADC pin with voltage divider
         """
         # Placeholder: implement for your specific UPS
-        # Example for Waveshare UPS HAT would use smbus2 to read registers
 
         # Stub: return 100% if not implemented
         return 100

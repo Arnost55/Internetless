@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Travel Router Core Services
   network-manager:
@@ -14,11 +12,10 @@ services:
       - ./config/network:/config
     environment:
       - TZ=UTC
-    # Capabilities needed for routing
+      # On the N100 board, eth0/eth1 are the 2.5GbE NICs, eth2 is 10GbE
     cap_add:
       - NET_ADMIN
       - NET_RAW
-      - SYS_MODULE
 
   # Status Web Interface
   status-web:
@@ -30,7 +27,6 @@ services:
     volumes:
       - ./config/status:/config
       - /sys/class/thermal:/sys/class/thermal:ro
-      - /proc:/host/proc:ro
     environment:
       - PORT=8080
       - UPDATE_INTERVAL=1000
@@ -68,10 +64,10 @@ services:
       - WEBPASSWORD=${PIHOLE_PASSWORD:-changeme}
       - DNS1=1.1.1.1
       - DNS2=9.9.9.9
-    cap_add:
-      - NET_ADMIN
 
   # Local AI API (Ollama for edge inference)
+  # N100 has no GPU; keep models small (1B-3B class). Coral TPU (USB)
+  # can be exposed with: devices: [/dev/apex_0:/dev/apex_0]
   local-ai:
     image: ollama/ollama:latest
     container_name: internetless-ai
@@ -82,23 +78,3 @@ services:
       - ./models:/root/.ollama/models
     environment:
       - OLLAMA_HOST=0.0.0.0
-    # For Coral TPU, add: --device=/dev/apex_0
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [gpu]
-
-volumes:
-  pihole_config:
-  dnsmasq_config:
-  esim_config:
-  models:
-  network_config:
-
-networks:
-  default:
-    name: internetless
-    driver: bridge
