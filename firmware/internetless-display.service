@@ -1,0 +1,12 @@
+[Unit]
+Description=Internetless OLED Status Monitor
+After=multi-user.target i2c-dev.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/internetless/src/display_daemon.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
