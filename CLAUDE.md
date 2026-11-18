@@ -2,7 +2,7 @@
 
 ## Project
 
-**Internetless** — compact modular SFF travel server/router (~1.6L), built around a Topton N100/N150 NAS Mini-ITX board (x86, native Proxmox), with a hot-swap UPS battery baseplate and a USB-C module bay for peripherals (5G modem, Wi-Fi 6E, Coral, SDR).
+**Internetless** — compact modular SFF travel server/router (~1.6L), built around a Topton N100/N150 NAS Mini-ITX board (x86, native Proxmox), with a hot-swap UPS battery baseplate and a bay of 6× M.2 A/E-key module slots (PCIe switch-fed; 5G modem, Wi-Fi 6E, Coral, SDR). Storage: boot NVMe + 6× SATA. See `pcb/baseplate/README.md` for the locked rev A baseplate design, including the three-tier hot-swap model (native SATA hot-swap, MCU-orchestrated quiesce protocol for powered modules, sleep-swap for cold ones) and the solenoid-locked eject latches in the module cage.
 
 Earlier revisions of this repo targeted a Raspberry Pi 5 with an 8-slot PCIe-switch cartridge matrix; that design is retired. Do not reintroduce Pi-specific artifacts (device-tree overlays, `config.txt`, `vcgencmd`, RPi.GPIO).
 
@@ -20,7 +20,8 @@ Earlier revisions of this repo targeted a Raspberry Pi 5 with an 8-slot PCIe-swi
 - `scripts/setup.sh` — host setup: i2c tools, Docker (on plain Debian; skipped on Proxmox VE).
 - `src/display_daemon.py` — OLED status daemon (luma.oled + psutil). CPU temp via hwmon/lm-sensors, not `vcgencmd`.
 - `services/docker-compose.yml` — service stack (network manager, status web, eSIM, Pi-hole, Ollama). N100 is CPU-only — keep local models to 1B–3B class.
-- `cad/` — chassis models (not yet populated).
+- `pcb/baseplate/` — locked rev A design for the baseplate PCB (power path, PCIe switch fabric, hot-swap mechanics).
+- `cad/` — chassis and module-cage models (not yet populated).
 
 ## Conventions
 

@@ -9,7 +9,7 @@ A portable, battery-backed networking and compute platform designed for homelab,
 
 ## Overview
 
-Internetless is a fully modular small-form-factor server built around an x86 NAS board (Topton N100/N150 Mini-ITX). It combines routing, storage, compute, and connectivity into a shoebox-sized package with hot-swappable USB modules and built-in UPS.
+Internetless is a fully modular small-form-factor server built around an x86 NAS board (Topton N100/N150 Mini-ITX). It combines routing, storage, compute, and connectivity into a shoebox-sized package with hot-swappable M.2 modules and built-in UPS.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
@@ -19,10 +19,10 @@ Internetless is a fully modular small-form-factor server built around an x86 NAS
 │  │  2× 2.5GbE + 10GbE               ~6W idle              │  │
 │  └────────────────────────────────────────────────────────┘  │
 │  ┌────────┐ ┌────────┐ ┌────────┐ ┌──────────────────────┐  │
-│  │ M.2    │ │ M.2    │ │ USB-C  │ │  0.96" OLED (I2C)    │  │
+│  │ M.2    │ │ M.2    │ │ M.2    │ │  0.96" OLED (I2C)    │  │
 │  │ NVMe 1 │ │ NVMe 2 │ │ module │ │  Battery monitor     │  │
 │  └────────┘ └────────┘ └────────┘ └──────────────────────┘  │
-│         Internal storage + USB-C module bay                  │
+│         Internal storage + M.2 module bay                    │
 │                                                              │
 │  ──────────────────────────────────────────────────────────  │
 │           Hot-Swappable UPS Baseplate (14mm)                 │
@@ -40,7 +40,7 @@ Internetless is a fully modular small-form-factor server built around an x86 NAS
 | **Core** | Topton N100/N150 NAS board (4-core Intel, 8–16GB DDR5 SODIMM) |
 | **Board options** | N8 (4× 2.5GbE, ~$124–140) or MW-N100-NAS (2× 2.5GbE + 10GbE, 2× M.2, 6× SATA, ~$139) |
 | **Storage** | 2× M.2 NVMe (PCIe x4/x1) + 6× SATA |
-| **Module Bay** | USB-C quick-swap (5G modem, Wi-Fi 6E, SDR, Coral) |
+| **Module Bay** | M.2 A/E-key quick-swap slots (5G modem, Wi-Fi 6E, SDR, Coral) |
 | **UPS** | Detachable 14mm hot-swap battery baseplate |
 | **Display** | 0.96" OLED (I2C, flush-mounted top) |
 | **Power** | ~6W idle, DC 12V input (from UPS baseplate) |
@@ -50,13 +50,12 @@ Internetless is a fully modular small-form-factor server built around an x86 NAS
 
 ## Supported Modules
 
-Wired networking (2.5GbE/10GbE) and NVMe storage are built into the board, so the hot-swap bay is reserved for the genuinely modular peripherals:
+Wired networking (2.5GbE/10GbE) and NVMe storage are built into the board, so the hot-swap bay is reserved for the genuinely modular peripherals. Modules are passive M.2 sticks in printed carriers with a locking notch; the eject cage (solenoid-locked push-push latches) and the swap orchestration (quiesce-then-release for powered modules) live in the baseplate — see [pcb/baseplate/README.md](pcb/baseplate/README.md).
 
-- **5G LTE / eSIM** — Mobile broadband connectivity (USB modem)
-- **Wi-Fi 6E** — Wireless AP and client modes (USB adapter)
-- **Coral AI TPU** — Edge ML inference (USB Coral)
-- **SDR** — Software-defined radio (RTL-SDR, HackRF)
-- **USB NVMe** — Ad-hoc external storage swaps
+- **5G LTE / eSIM** — Mobile broadband connectivity (USB lines in the M.2 slot)
+- **Wi-Fi 6E** — Wireless AP and client modes (PCIe)
+- **Coral AI TPU** — Edge ML inference (M.2 A/E variant)
+- **SDR** — Software-defined radio (RTL-SDR, HackRF, via USB lines)
 
 ---
 
@@ -72,7 +71,7 @@ Wired networking (2.5GbE/10GbE) and NVMe storage are built into the board, so th
 ├────────────────────────────────────────────────────────────────┤
 │  I2C ◄─── 0.96" OLED Display                                   │
 │       ◄─── UPS Battery Monitor (SMBus fuel gauge or ADC)       │
-│  USB  ──► Hot-swap module bay (5G / Wi-Fi / Coral / SDR)       │
+│  PCIe/USB ──► Hot-swap M.2 module bay (5G / Wi-Fi / Coral/SDR) │
 ├────────────────────────────────────────────────────────────────┤
 │  Software Stack                                                │
 │  ├─ Proxmox VE (native x86 — no ARM ports)                    │
@@ -82,7 +81,7 @@ Wired networking (2.5GbE/10GbE) and NVMe storage are built into the board, so th
 └────────────────────────────────────────────────────────────────┘
 ```
 
-No PCIe switch chip or custom backplane is needed: the two M.2 slots have real PCIe lanes and the module bay is plain USB. The old 8-slot cartridge matrix (ASM1187E) is retired — same capability, less hardware.
+The module bay uses M.2 A/E-key slots, which carry both a PCIe x1 lane and USB — so any module type (PCIe or USB based) fits the same connector. The baseplate PCB owns the slot power rails and fans lanes out to the slots; see [pcb/baseplate/README.md](pcb/baseplate/README.md). The old 8-slot cartridge matrix (ASM1187E) is retired — same capability, less hardware.
 
 ---
 
