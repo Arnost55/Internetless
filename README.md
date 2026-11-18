@@ -159,7 +159,7 @@ internetless/
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+Internetless Non-Commercial License (INCL) v1.0 — free for personal, educational, and non-commercial use with attribution; commercial use requires permission. See [LICENSE.md](LICENSE.md) for details.
 
 ---
 
