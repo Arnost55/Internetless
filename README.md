@@ -1,7 +1,7 @@
 # Internetless
 
-**Compact 1.1L Modular SFF Travel Server and Router**  
-145mm × 130mm × 60mm | Raspberry Pi 5 (16GB)
+**Compact ~1.6L Modular SFF Travel Server and Router**
+170mm × 170mm × 55mm | Intel N100/N150 NAS board
 
 A portable, battery-backed networking and compute platform designed for homelab, travel, and edge deployments.
 
@@ -9,24 +9,25 @@ A portable, battery-backed networking and compute platform designed for homelab,
 
 ## Overview
 
-Internetless is a fully modular small-form-factor server built around a Raspberry Pi 5. It combines routing, storage, compute, and connectivity into a palm-sized package with hot-swappable modules and built-in UPS.
+Internetless is a fully modular small-form-factor server built around an x86 NAS board (Topton N100/N150 Mini-ITX). It combines routing, storage, compute, and connectivity into a shoebox-sized package with hot-swappable USB modules and built-in UPS.
 
 ```
-┌─────────────────────────────────────────────────────────────┐
-│  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐     ┌──────────────┐  │
-│  │ M.2 │  │ M.2 │  │ M.2 │  │ M.2 │     │   0.96" OLED │  │
-│  │ #1  │  │ #2  │  │ #3  │  │ #4  │     │   (I2C)      │  │
-│  └─────┘  └─────┘  └─────┘  └─────┘     └──────────────┘  │
-│  ┌─────┐  ┌─────┐  ┌─────┐  ┌─────┐                       │
-│  │ M.2 │  │ M.2 │  │ M.2 │  │ M.2 │     Raspberry Pi 5    │
-│  │ #5  │  │ #6  │  │ #7  │  │ #8  │     (16GB RAM)        │
-│  └─────┘  └─────┘  └─────┘  └─────┘                       │
-│                    2×4 Cartridge Matrix                     │
-│                                                             │
-│  ─────────────────────────────────────────────────────────  │
-│          Hot-Swappable UPS Baseplate (14mm)                │
-│                 Pogo-Pin Connector                          │
-└─────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────┐
+│  ┌────────────────────────────────────────────────────────┐  │
+│  │        Topton N100/N150 NAS Mini-ITX board             │  │
+│  │  2× M.2 NVMe (real PCIe lanes)   6× SATA               │  │
+│  │  2× 2.5GbE + 10GbE               ~6W idle              │  │
+│  └────────────────────────────────────────────────────────┘  │
+│  ┌────────┐ ┌────────┐ ┌────────┐ ┌──────────────────────┐  │
+│  │ M.2    │ │ M.2    │ │ USB-C  │ │  0.96" OLED (I2C)    │  │
+│  │ NVMe 1 │ │ NVMe 2 │ │ module │ │  Battery monitor     │  │
+│  └────────┘ └────────┘ └────────┘ └──────────────────────┘  │
+│         Internal storage + USB-C module bay                  │
+│                                                              │
+│  ──────────────────────────────────────────────────────────  │
+│           Hot-Swappable UPS Baseplate (14mm)                 │
+│                  Pogo-Pin Connector                          │
+└──────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -35,26 +36,27 @@ Internetless is a fully modular small-form-factor server built around a Raspberr
 
 | Component | Details |
 |-----------|---------|
-| **Dimensions** | 145 × 130 × 60 mm (1.1L) |
-| **Core** | Raspberry Pi 5 (16GB) |
-| **Backplane** | 8-port PCIe via ASMedia ASM1187E packet switch |
-| **Cartridge Slots** | 8 × USB-C quick-swap (Waveshare HATs / M.2 modules) |
+| **Dimensions** | 170 × 170 × 55 mm (~1.6L) |
+| **Core** | Topton N100/N150 NAS board (4-core Intel, 8–16GB DDR5 SODIMM) |
+| **Board options** | N8 (4× 2.5GbE, ~$124–140) or MW-N100-NAS (2× 2.5GbE + 10GbE, 2× M.2, 6× SATA, ~$139) |
+| **Storage** | 2× M.2 NVMe (PCIe x4/x1) + 6× SATA |
+| **Module Bay** | USB-C quick-swap (5G modem, Wi-Fi 6E, SDR, Coral) |
 | **UPS** | Detachable 14mm hot-swap battery baseplate |
 | **Display** | 0.96" OLED (I2C, flush-mounted top) |
+| **Power** | ~6W idle, DC 12V input (from UPS baseplate) |
 | **Chassis** | 3D-printed PETG with TPU bumpers |
 
 ---
 
 ## Supported Modules
 
-The 8-cartridge matrix supports hot-swap modules including:
+Wired networking (2.5GbE/10GbE) and NVMe storage are built into the board, so the hot-swap bay is reserved for the genuinely modular peripherals:
 
-- **5G LTE / eSIM** — Mobile broadband connectivity
-- **NVMe SSD** — High-speed storage (via PCIe/NVMe HATs)
-- **Wi-Fi 6E** — Wireless AP and client modes
-- **Coral AI TPU** — Edge ML inference
+- **5G LTE / eSIM** — Mobile broadband connectivity (USB modem)
+- **Wi-Fi 6E** — Wireless AP and client modes (USB adapter)
+- **Coral AI TPU** — Edge ML inference (USB Coral)
 - **SDR** — Software-defined radio (RTL-SDR, HackRF)
-- **2.5GbE LAN** — Additional wired networking
+- **USB NVMe** — Ad-hoc external storage swaps
 
 ---
 
@@ -62,21 +64,25 @@ The 8-cartridge matrix supports hot-swap modules including:
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                    Raspberry Pi 5 (16GB)                       │
+│           Topton N100/N150 NAS Mini-ITX board                  │
 ├────────────────────────────────────────────────────────────────┤
-│  PCIe Gen 3 ×1 ──► ASMedia ASM1187E ──► 8-port USB-C backplane │
-│                        (Packet Switch IC)                      │
+│  PCIe (native) ──► 2× M.2 NVMe slots                           │
+│  SATA (native) ──► 6× SATA ports                               │
+│  Ethernet ──► 2× 2.5GbE (+ optional 10GbE SFP+/RJ45)           │
 ├────────────────────────────────────────────────────────────────┤
-│  I2C Bus ◄─── 0.96" OLED Display                              │
-│         ◄─── UPS Battery Monitor (GPIO/ADC)                   │
+│  I2C ◄─── 0.96" OLED Display                                   │
+│       ◄─── UPS Battery Monitor (SMBus fuel gauge or ADC)       │
+│  USB  ──► Hot-swap module bay (5G / Wi-Fi / Coral / SDR)       │
 ├────────────────────────────────────────────────────────────────┤
 │  Software Stack                                                │
-│  ├─ Pi OS / Pimox (Pi 5 port of Proxmox)                      │
-│  ├─ Device Tree Overlays (PCIe Gen 3, I2C, power)             │
+│  ├─ Proxmox VE (native x86 — no ARM ports)                    │
+│  ├─ Debian + Docker (alternative lightweight install)         │
 │  ├─ display_daemon.py (OLED status monitor)                   │
 │  └─ systemd services for auto-start                           │
 └────────────────────────────────────────────────────────────────┘
 ```
+
+No PCIe switch chip or custom backplane is needed: the two M.2 slots have real PCIe lanes and the module bay is plain USB. The old 8-slot cartridge matrix (ASM1187E) is retired — same capability, less hardware.
 
 ---
 
@@ -84,8 +90,8 @@ The 8-cartridge matrix supports hot-swap modules including:
 
 ### Prerequisites
 
-- Raspberry Pi 5 (4GB or 8GB recommended, 16GB optimal)
-- Pi OS 64-bit (Bookworm) or Pimox
+- Topton N100/N150 NAS board + DDR5 SODIMM + M.2 NVMe
+- USB install media with Proxmox VE or Debian 12
 - Internet connection for initial setup
 
 ### 1. Clone the Repository
@@ -95,24 +101,25 @@ git clone https://github.com/yourusername/internetless.git
 cd internetless
 ```
 
-### 2. Run Setup Script
+### 2. Flash the Host OS
+
+Write Proxmox VE (or Debian 12) to a USB stick and install to the first NVMe. In the board BIOS, check that:
+
+- **ASPM** is enabled (for the ~6W idle target)
+- **AC power loss recovery** is set to *Power On* (UPS behavior)
+- **I2C/SMBus** controller is enabled (for the OLED)
+
+### 3. Run Setup Script
 
 ```bash
-chmod +x scripts/setup-pcie.sh
-sudo ./scripts/setup-pcie.sh
+chmod +x scripts/setup.sh
+sudo ./scripts/setup.sh
 ```
 
-This enables PCIe Gen 3 and installs required tools:
-- `pciutils` — PCIe device management
+This installs the host tooling for the OLED and monitoring:
 - `i2c-tools` — I2C bus utilities
 - `lm-sensors` — Hardware monitoring
-- `dtc` — Device Tree Compiler
-
-### 3. Reboot
-
-```bash
-sudo reboot
-```
+- Docker + Compose (if installing on plain Debian)
 
 ### 4. Start OLED Display Daemon
 
@@ -131,10 +138,10 @@ For systemd auto-start, see `firmware/` for service unit files.
 ```
 internetless/
 ├── cad/                 # Fusion 360 models, STEP, DXF, STL
-├── pcb/                 # KiCad backplane project (ASM1187E)
-├── firmware/            # Device Tree Overlays (.dts / .dtbo)
+├── firmware/            # systemd units and hardware notes
 ├── src/                 # Display daemon and utilities
 ├── scripts/             # Setup and configuration scripts
+├── services/            # Docker Compose stack
 └── README.md
 ```
 
@@ -144,10 +151,9 @@ internetless/
 
 | Component | Status |
 |-----------|--------|
-| PCB Design | In progress |
 | 3D Chassis | Design phase |
-| Firmware/DTBO | Stub |
 | Display Daemon | Alpha |
+| Docker Stack | Alpha |
 | Documentation | Active |
 
 ---
@@ -166,7 +172,5 @@ Contributions welcome! Please open an issue or submit a pull request.
 
 ## Acknowledgments
 
-- Raspberry Pi Foundation
-- ASMedia (ASM1187E PCIe switch)
-- Waveshare (HAT ecosystem)
+- Topton / AliExpress NAS board ecosystem
 - luma.oled project
